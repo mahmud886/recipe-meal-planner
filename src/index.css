@@ -1,0 +1,7 @@
+@import 'tailwindcss';
+
+body {
+  @apply min-h-screen antialiased;
+  background: radial-gradient(circle at top left, #ecfae5 0, #ddf6d2 40%, #ffffff 100%);
+  color: #16341f;
+}

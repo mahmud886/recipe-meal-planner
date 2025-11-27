@@ -55,6 +55,8 @@ GET https://www.themealdb.com/api/json/v1/1/categories.php
 GET https://www.themealdb.com/api/json/v1/1/filter.php?c=Seafood
 ```
 
+**Note:** TheMealDB is free but has rate limits. The app includes error handling for 429 (Too Many Requests) responses with user-friendly messages. See `utils/api.ts` for implementation details.
+
 ---
 
 ## 📊 Data Structure Example
@@ -119,7 +121,8 @@ src/
 
 1. **Libraries & tooling:** React 19 + Vite 7 for fast DX, Tailwind utility classes for rapid styling, and `sonner` for lightweight toasts.
 2. **Patterns:** Context + reducer for predictable state transitions; hooks for fetch logic + side effects; Presentational components stay stateless.
-3. **Trade-offs & future work:** Could add pagination, category caching, optimistic UI for shopping toggles, or move to TanStack Query for smarter caching.
+3. **Error handling:** Centralized API error handling with `fetchWithErrorHandling` wrapper that detects rate limits (429) and other HTTP errors, providing user-friendly messages. Custom `ApiError` class extends Error for better error tracking.
+4. **Trade-offs & future work:** Could add pagination, category caching, optimistic UI for shopping toggles, or move to TanStack Query for smarter caching.
 
 ---
 
@@ -153,7 +156,11 @@ src/
    Accessing `localStorage` directly can fail in non-browser contexts.
    I introduced a `getInitialState` helper in `MealPlanContext` that guards on `typeof window !== 'undefined'` and wraps reads/writes in `try/catch`, so the app stays robust while still persisting the meal plan.
 
-4. **Balancing loading states and perceived performance**
+4. **Handling API rate limits gracefully**
+   TheMealDB has rate limits that can return 429 (Too Many Requests) responses.
+   I implemented a centralized `fetchWithErrorHandling` function in `utils/api.ts` that detects 429 status codes and throws a custom `ApiError` with a user-friendly message. All API calls now use this wrapper, ensuring consistent error handling across the app.
+
+5. **Balancing loading states and perceived performance**
    Plain spinners felt jarring when fetching recipes or details.
    I replaced them with lightweight skeleton loaders in `App.tsx` and `RecipeDetailsModal`, and added debounced search input so the app doesn’t refetch on every keystroke.
 
@@ -183,6 +190,7 @@ src/
 - [x] Parallel API calls in shopping list (`useMealPlan.generateShoppingList`)
 - [x] Loading states for all async operations (`useRecipes`, `useRecipeDetails`, `<RecipeList>`)
 - [x] Error handling for failed API calls
+- [x] API rate limit handling (429 responses) with user-friendly messages
 - [x] Responsive on mobile (320px) and desktop (1024px+)
 
 ---

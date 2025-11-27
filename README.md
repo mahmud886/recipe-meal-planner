@@ -1,73 +1,187 @@
-# React + TypeScript + Vite
+## Recipe Meal Planner - Take-Home Project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🎯 What You're Building
 
-Currently, two official plugins are available:
+A meal planning app where users can:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Search and browse recipes.
+2. View recipe details with ingredients.
+3. Plan meals for the week (7 days).
+4. Generate a shopping list from planned meals.
 
-## React Compiler
+**API:** TheMealDB (Free, no key needed — simply use the dev account) - https://www.themealdb.com/api.php
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## ✅ Core Requirements
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Features (Must Have)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+1. **Recipe Search** _(Status: ✅ Implemented via `useDebouncedValue` + `useRecipes`)_
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+   1. Search by recipe name.
+   2. Filter by category (dropdown).
+   3. Display results in a grid with image, name, category (`RecipeCard`).
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. **Recipe Details** _(Status: ✅ Implemented via `RecipeDetailsModal`)_
+
+   1. Show full recipe (ingredients, instructions, image).
+   2. Displayed inside an accessible modal with keyboard support.
+
+3. **Weekly Meal Plan** _(Status: ✅ Implemented via `WeeklyMealPlanner` + Context)_
+
+   1. 7-day calendar (Mon-Sun).
+   2. Add recipe to any day.
+   3. Remove recipe from a day, with toast feedback.
+
+4. **Shopping List** _(Status: ✅ Implemented via `ShoppingListPanel` + `useMealPlan`)_
+   1. Auto-generate from all planned meals (parallel detail fetches).
+   2. Checkbox to mark items as purchased.
+   3. Clear completed items.
+
+---
+
+## 🔌 API Endpoints
+
+```bash
+# Search recipes
+GET https://www.themealdb.com/api/json/v1/1/search.php?s=chicken
+
+# Get recipe details
+GET https://www.themealdb.com/api/json/v1/1/lookup.php?i=52772
+
+# List categories
+GET https://www.themealdb.com/api/json/v1/1/categories.php
+
+# Filter by category
+GET https://www.themealdb.com/api/json/v1/1/filter.php?c=Seafood
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📊 Data Structure Example (Moderate if you need)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```tsx
+export interface Ingredient {
+  name: string;
+  measure: string;
+}
+
+export interface Recipe {
+  id: string;
+  name: string;
+  category: string;
+  area: string;
+  instructions: string;
+  thumbnail: string;
+  ingredients: Ingredient[];
+}
+
+export type DayOfWeek = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
+
+export type MealPlan = Record<DayOfWeek, Recipe | null>;
 ```
+
+---
+
+## 📁 Expected Project Structure (Moderate if you need)
+
+```
+src/
+├── components/      # React components
+├── hooks/           # Custom hooks (useRecipes, useRecipeDetails, useMealPlan)
+├── context/         # State management (Context API)
+├── types/           # TypeScript interfaces
+├── utils/           # Helper functions
+└── App.tsx
+```
+
+---
+
+## Setup & Run
+
+1. **Prerequisites:** Node.js v22.19.0 and npm.
+2. **Installation:** `npm install`
+3. **Environment variables:** Not required (TheMealDB is public).
+4. **Run locally:** `npm run dev` then open the printed Vite URL.
+5. **Build:** `npm run build`
+6. **Preview production build:** `npm run preview`
+
+---
+
+## Architecture Overview
+
+1. Folder structure follows the `components | hooks | context | types | utils` separation for clarity.
+2. State management uses React Context + reducer (`MealPlanContext`) to share the weekly plan and shopping list across the tree while persisting to `localStorage`.
+3. Custom hooks (`useRecipes`, `useRecipeDetails`, `useMealPlan`, `useDebouncedValue`) encapsulate async data fetching, derived state, and debounced inputs, keeping components lean.
+
+---
+
+## Technical Decisions
+
+1. **Libraries & tooling:** React 19 + Vite 7 for fast DX, Tailwind utility classes for rapid styling, and `sonner` for lightweight toasts.
+2. **Patterns:** Context + reducer for predictable state transitions; hooks for fetch logic + side effects; Presentational components stay stateless.
+3. **Trade-offs & future work:** Could add pagination, category caching, optimistic UI for shopping toggles, or move to TanStack Query for smarter caching.
+
+---
+
+## Time Breakdown
+
+```markdown
+| Task              | Time Spent  |
+| ----------------- | ----------- |
+| Setup & structure | 50 min      |
+| Custom hooks      | 120 min     |
+| State management  | 120 min     |
+| UI components     | 180 min     |
+| API integration   | 120 min     |
+| Testing & fixes   | 60 min      |
+| **Total**         | **10h 50m** |
+```
+
+---
+
+## Challenges Faced
+
+1. Document any specific problems you encountered.
+2. Summarize how you solved or mitigated them.
+
+---
+
+## Screenshots
+
+- Recipe search/browse page
+  ![Recipe Search](./public/screenshoot/search-browse.png)
+- Recipe details view
+  ![Recipe Details](./public/screenshoot/recipe-details-view.png)
+- Weekly meal plan
+  ![Weekly Meal Plan](./public/screenshoot/weekly-meal-plan.png)
+- Shopping list
+  ![Shopping List](./public/screenshoot/shopping-list.png)
+- Mobile responsive view
+  ![Mobile View](./public/screenshoot/search-browse-mobile.png)
+
+---
+
+## Code Quality Checklist
+
+- [x] Project builds without errors: `npm run build`
+- [x] No TypeScript errors (if TypeScript is used): `npm run type-check`
+- [x] No ESLint warnings (critical ones fixed)
+- [x] All 3 custom hooks implemented (`useRecipes`, `useRecipeDetails`, `useMealPlan`)
+- [x] Parallel API calls in shopping list (`useMealPlan.generateShoppingList`)
+- [x] Loading states for all async operations (`useRecipes`, `useRecipeDetails`, `<RecipeList>`)
+- [x] Error handling for failed API calls
+- [x] Responsive on mobile (320px) and desktop (1024px+)
+
+---
+
+## ✨ Bonus Points (Optional)
+
+Already implemented.
+
+1. Local storage persistence for meal plan _(Status: ✅ Implemented via `MealPlanProvider`)_
+2. Debounced search input _(Status: ✅ Implemented via `useDebouncedValue`)_
+3. Loading skeletons instead of spinners _(Status: ✅ Implemented in `App.tsx` + `RecipeDetailsModal`)_
+4. Empty states with helpful messages _(Status: ✅ Implemented in recipes + shopping list panels)_
+5. Recipe card hover effects _(Status: ✅ Implemented in `RecipeCard`)_

@@ -67,7 +67,7 @@ export function RecipeDetailsModal({ recipe, isOpen, isLoading, onClose }: Recip
           <>
             <div className='relative h-52 w-full overflow-hidden'>
               <img src={recipe.thumbnail} alt={recipe.name} className='h-full w-full object-cover' />
-              <div className='absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent' />
+              <div className='absolute inset-0 bg-linear-to-t from-black/65 via-black/15 to-transparent' />
               <div className='absolute bottom-3 left-4 right-4'>
                 <h2 className='text-lg font-semibold text-[#ECFAE5]'>{recipe.name}</h2>
                 <p className='mt-1 text-xs text-[#ECFAE5]'>

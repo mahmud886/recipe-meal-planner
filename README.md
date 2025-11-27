@@ -1,6 +1,6 @@
 ## Recipe Meal Planner - Take-Home Project
 
-## 🎯 What You're Building
+## 🎯 Project Overview
 
 A meal planning app where users can:
 
@@ -13,9 +13,7 @@ A meal planning app where users can:
 
 ---
 
-## ✅ Core Requirements
-
-### Features (Must Have)
+### Features
 
 1. **Recipe Search** _(Status: ✅ Implemented via `useDebouncedValue` + `useRecipes`)_
 
@@ -59,7 +57,7 @@ GET https://www.themealdb.com/api/json/v1/1/filter.php?c=Seafood
 
 ---
 
-## 📊 Data Structure Example (Moderate if you need)
+## 📊 Data Structure Example
 
 ```tsx
 export interface Ingredient {
@@ -84,7 +82,7 @@ export type MealPlan = Record<DayOfWeek, Recipe | null>;
 
 ---
 
-## 📁 Expected Project Structure (Moderate if you need)
+## 📁 Expected Project Structure
 
 ```
 src/
@@ -143,8 +141,21 @@ src/
 
 ## Challenges Faced
 
-1. Document any specific problems you encountered.
-2. Summarize how you solved or mitigated them.
+1. **Designing a clean data model from TheMealDB responses**
+   The raw API shape (20 separate ingredient/measure fields per meal) is not convenient for React components.
+   I solved this by adding a small mapping layer in `utils/api.ts` that normalizes each meal into a `Recipe` object with a typed `ingredients: Ingredient[]` array, which made the UI and hooks much simpler.
+
+2. **Coordinating multiple async calls for the shopping list**
+   Generating a list from all planned meals requires fetching detailed recipe data for each selected id.
+   I used `Promise.all` inside `useMealPlan.generateShoppingList` to run these requests in parallel, then deduplicated items by a stable key of `name+measure` to avoid duplicates in the UI.
+
+3. **Persisting state without breaking server-side safety**
+   Accessing `localStorage` directly can fail in non-browser contexts.
+   I introduced a `getInitialState` helper in `MealPlanContext` that guards on `typeof window !== 'undefined'` and wraps reads/writes in `try/catch`, so the app stays robust while still persisting the meal plan.
+
+4. **Balancing loading states and perceived performance**
+   Plain spinners felt jarring when fetching recipes or details.
+   I replaced them with lightweight skeleton loaders in `App.tsx` and `RecipeDetailsModal`, and added debounced search input so the app doesn’t refetch on every keystroke.
 
 ---
 

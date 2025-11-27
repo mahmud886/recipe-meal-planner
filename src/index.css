@@ -2,6 +2,6 @@
 
 body {
   @apply min-h-screen antialiased;
-  background: radial-gradient(circle at top left, #ecfae5 0, #ddf6d2 40%, #ffffff 100%);
+  background: radial-gradient(circle at top left, #ECFAE5 0, #DDF6D2 40%, #ffffff 100%);
   color: #16341f;
 }
